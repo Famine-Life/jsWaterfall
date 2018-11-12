@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>js实现瀑布流——github站的图片都在这啦</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 样式部分 -->
+    <style>
+            * {
+                margin: 0;
+                padding: 0;
+                position: relative;
+            }
+            
+            img {
+                /* 让图片初始为隐藏状态 */
+                visibility: hidden;
+            }
+
+            .item {
+                box-shadow: 2px 2px 2px #999;
+                position: absolute;
+            }
+            
+            .nav {
+                margin: 0 auto;
+                text-align: center;
+                line-height: 100px;
+                height: 100px;
+            }
+            .main {
+                width:90%;
+                margin:0 auto;
+                margin-top: 20px;
+            }
+    </style>
+</head>
+<body>
+    <!-- html 部分 -->
+    <div class="nav">
+        <h1>js瀑布流 ——展示github站点图片<span style="font-size: 20px;color: red">(bug:如果样式出错，请尝试刷新)</span></h1>
+        
+    </div>
+    <hr>
+    <div>
+        <div class="main" id="box">
+             <!-- <div class="item">
+                <img src="../img/1.jpg" alt="">
+            </div> -->
+        </div>
+    </div>
+    
+    <!-- js 部分 -->
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+    <script>
+        var box = document.getElementById('box');
+        var items = box.children;
+        // 定义每一列之间的间隙 为10像素
+        var gap = 10;
+        var datas;  //数据储存
+        var firstNum=0;
+        var lastNum=120;
+        
+        
+    window.onload = function() {
+
+        // 首先 ajax 获取数据  
+        //原生的ajax不是特别熟悉，借用下jq
+        //jQuery.ajax( url [, settings ] )
+        var responseData = (function() {
+            var result;
+            $.ajax({
+                type:'GET',
+                url:'https://api.github.com/emojis',
+                dataType:'json',
+                data:{url:"http://github.com"},
+                async:false,
+                success:function(data){
+                    result = data;
+                },
+                error: function(){
+                    console.log("error");
+                }
+            });
+            return result;
+        })();
+        
+
+        //对象转数组
+        var arr = [];
+        for(var str in responseData){
+            arr.push(responseData[str]);
+            }
+        datas=arr;
+        //数据验证
+        //console.log("aBdatas:",datas);
+    
+            // //一进来加载30张图片
+            // for(var i=0; i<30; i++){
+            //     console.log(datas[i]);
+            //     var div = document.createElement("div");
+            //     div.className = "item";
+            //     div.innerHTML = "<img src='" + datas[i] + "'alt=''>";
+            //     box.appendChild(div);
+            //     }
+            
+            //  //瀑布流    
+            //  waterFall();
+
+            addImg_inDiv(firstNum,lastNum);
+            console.log("onload:",firstNum,lastNum);  
+                
+            //console.log(img_isLoaded());
+            //初始化页面
+            if(img_isLoaded()){
+                //加载瀑布流
+                waterFall();
+            }
+
+
+                
+        //图片加载判断
+        function img_isLoaded(){
+            var isLoaded=false;
+            //图片加载完成判断
+            var flag = 0;
+            //获取图片数组 var imgobj = document.images;  or    
+            var imgobj = box.getElementsByTagName("img");
+            //console.log(imgobj);
+            for (var i = 0; i < items.length; i++) {
+                isLoaded = imgobj[i].onload = function(){
+                    //flag用于图片加载数量判断
+                    flag++;
+                    //如果所有图片均已加载
+                    if(flag==imgobj.length){
+                        //console.log("img loaded");
+                        //设置图片可见
+                        for(var j=0;j<imgobj.length;j++){
+                            imgobj[j].style.visibility="visible";
+                        }
+                        return true;
+
+                    }else{
+                        console.log("img no loaded");
+                    }
+                }()
+            }
+            return isLoaded;
+        }
+
+            
+   
+        //瀑布流构成  封装成一个函数
+        function waterFall() {
+                // 1- 确定列数  = 页面的宽度 / 图片的宽度
+                var pageWidth = getClient().width;
+                //console.log("items",items[0]);
+
+                //var itemWidth = items[0].offsetWidth; //由于图片未加载所以通过图片来来确定这个宽度不适用
+                var itemWidth = 128;    
+                var columns = parseInt(pageWidth / (itemWidth + gap));
+                var arr = [];
+                for (var i = 0; i < items.length; i++) {
+                    if (i < columns) {
+                        // 2- 确定第一行
+                        items[i].style.top = 0;
+                        items[i].style.left = (itemWidth + gap) * i + 'px';
+                        arr.push(items[i].offsetHeight);
+
+                    } else {
+                        // 其他行
+                        // 3- 找到数组中最小高度  和 它的索引
+                        var minHeight = arr[0];
+                        var index = 0;
+                        for (var j = 0; j < arr.length; j++) {
+                            if (minHeight > arr[j]) {
+                                minHeight = arr[j];
+                                index = j;
+                            }
+                        }
+                        // 4- 设置下一行的第一个盒子位置
+                        // top值就是最小列的高度 + gap
+                        items[i].style.top = arr[index] + gap + 'px';
+                        // left值就是最小列距离左边的距离
+                        items[i].style.left = items[index].offsetLeft + 'px';
+
+                        // 5- 修改最小列的高度 
+                        // 最小列的高度 = 当前自己的高度 + 拼接过来的高度 + 间隙的高度
+                        arr[index] = arr[index] + items[i].offsetHeight + gap;
+                    }
+                }
+            }  
+            // 页面尺寸改变时实时触发
+            window.onresize = function() {
+               
+                    waterFall();
+            };
+
+
+        //滚动触发事件
+        window.onscroll = function() {
+            if (getClient().height + getScrollTop() >= items[items.length - 1].offsetTop) {
+                //console.log("test",datas);
+                //先把两个数增加是因为，onload里已经执行了一次了，如果不修改会出现重复内容
+                firstNum=lastNum+1;
+                lastNum=lastNum+50;
+                addImg_inDiv(firstNum,lastNum);
+                console.log("onscroll:",firstNum,lastNum);
+                if(img_isLoaded()){
+                    //加载瀑布流
+                    waterFall();
+                }
+            }
+
+        };
+     
+        //添加图片
+        function addImg_inDiv(firstNum,lastNum){
+            for(var i=firstNum; i<lastNum; i++){
+                //console.log(i);
+                    var div = document.createElement("div");
+                    div.className = "item";
+                    div.innerHTML = "<img src='" + datas[i] + "'alt=''>";
+                    box.appendChild(div);
+            }
+            firstNum=lastNum+1;
+            lastNum=lastNum+30;
+        }
+
+    };
+
+
+    // clientWidth 处理兼容性
+    function getClient() {
+        return {
+            width: window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+            height: window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+        }
+    }
+    // scrollTop兼容性处理
+    function getScrollTop() {
+        return window.pageYOffset || document.documentElement.scrollTop;
+    }
+</script>
+</body>
