@@ -1,3 +1,16 @@
+
+### 很抱歉，这里是 branch_img_isload 开发测试分支
+
+正在思考 [jsWaterfall](https://blog.liantao.me/jsWaterfall/) 的初始页面加载的样式问题的解决方案
+
+目前正在尝试使用 **图片是否加载完成** 的条件来确定是否显示图片，，但是目前未成功
+
+END
+
+
+
+=============
+
 ### js瀑布流 展示github图片
 
 目前第一次进入页面有显示bug
