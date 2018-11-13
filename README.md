@@ -5,6 +5,7 @@
 
 github的接口提供的图片在某一段区间内，会有两张相同的图片出现，导致有时候能看到两张相同的图片同时出现。
 
+### 添加了一个js全屏显示并生成markdown链接的[插件](https://github.com/Famine-Life/jsFullScreen)
 
 ### 最简单的使用方法：
 

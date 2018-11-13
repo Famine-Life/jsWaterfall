@@ -5,6 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>js实现瀑布流——github站的图片都在这啦</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+     <!-- bootstrap -->
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/fullScreen.css" rel="stylesheet">
+ 
     <!-- 样式部分 -->
     <style>
             * {
@@ -44,10 +48,15 @@
 </head>
 <body>
     <!-- html 部分 -->
-    <div class="nav">
+    <div style="text-align:center" class="jumbotron">
+            <h1>js瀑布流 ——展示github站点图片</h1>
+            <p>还可以生成 markdown 链接哦</p>
+            <p>bug:如果样式出错，请尝试刷新：<a class="btn btn-primary btn-lg" href="https://blog.liantao.me/jsWaterfall" role="button">刷新</a></p>
+    </div>
+    <!-- <div class="nav">
         <h1>js瀑布流 ——展示github站点图片<span style="font-size: 20px;color: red">(bug:如果样式出错，请尝试刷新)</span></h1>
         
-    </div>
+    </div> -->
     <hr>
     <div>
         <div class="main" id="box">
@@ -56,8 +65,36 @@
             </div> -->
         </div>
     </div>
+    <!-- fullScreen图片展示部分 -->
+    <div id="fullScreen">
+        <div id="fullScreen_popup_close">
+            <!-- <button type="button" class="close" aria-label="Close"></button> -->
+            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </div>
+        <!-- 弹窗-->
+        <div id="fullScreen_popup">
+            <!-- 关闭按钮 -->
+            <div class="bg"><img src="" alt=""/></div>
+            <!-- 展示图片地址栏 -->
+            <div class="url_info">
+                <div class="url_info_box">
+                    <div class="input-group">
+                        <span style="width:140px" class="input-group-addon">img url:</span>
+                        <input style="width:660px" type="text" class="form-control" id="img_show_url" aria-describedby="basic-addon3">
+                    </div>
+                    <div class="input-group">
+                        <span style="width:140px" class="input-group-addon">markdown img url:</span>
+                        <input style="width:660px" type="text" class="form-control" id="markdownimg_show_url" aria-describedby="basic-addon3">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     
     <!-- js 部分 -->
+    <script src="js/fullScreen.js"></script>
     <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
     <script>
         var box = document.getElementById('box');
@@ -121,6 +158,8 @@
             var flag = 0;
             //获取图片数组 var imgobj = document.images;  or    
             var imgobj = box.getElementsByTagName("img");
+            //添加图片全屏显示
+            doFullScreen(imgobj);
             //console.log(imgobj);
             for (var i = 0; i < items.length; i++) {
                 imgobj[i].onload = function(){
@@ -196,6 +235,13 @@
                 lastNum=lastNum+50;
                 addImg_inDiv(firstNum,lastNum);
                 console.log("onscroll:",firstNum,lastNum);
+
+                //获取图片数组 var imgobj = document.images;  or    
+                var imgobj = box.getElementsByTagName("img");
+                //添加图片全屏显示
+                doFullScreen(imgobj);
+
+                //瀑布流
                 waterFall();
             }
 
